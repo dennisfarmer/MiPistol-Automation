@@ -335,7 +335,7 @@ return
 
 ;TODO send scanned batches email to whole team
 ;To:
-;Fink, Kari (MSP) <FinkK1@michigan.gov>; Curtis, Corey (MSP) <CurtisC6@michigan.gov>; Mitchell, Francine (MSP) <MitchellF2@michigan.gov>; Wells, Bobbi Jo (MSP) <WellsB9@michigan.gov>; Farmer, Dennis (MSP) <FarmerD2@michigan.gov>; Wyskowski, Julie (MSP) <WyskowskiJ@michigan.gov>
+; (add emails here with seperate file that is gitignored)
 
 ;tab tab
 ; send Entry{Space}Batches
