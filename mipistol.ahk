@@ -1,25 +1,56 @@
 ; https://www.autohotkey.com/docs/KeyList.htm
 #NoEnv
+#SingleInstance
 SendMode Input
 SetWorkingDir %A_ScriptDir%
 
 Capslock::Esc
 Esc::Capslock
 
-NumpadAdd::Tab
-NumpadSub::+Tab
-NumpadMult::P
+; Run in restart.ahk:
+;NumpadIns::Run mipistol.ahk
+
+RWin::Reload
+
+Ctrl & RWin::ExitApp
 
 ;NumpadIns::ExitApp
-NumpadIns::DllCall("LockWorkStation")
+;NumpadIns::DllCall("LockWorkStation")
+
+; The height of the internet explorer search bar
+; different from edge
+IEHeight = 54
+;MSEdgeHeight := ??
+
+; if not fullscreen: blahblahblah
+; correct y from top / bottom
+topYcorr()
+{
+    return 0
+    ; IE: (Use global variables here) return IEHeight, etc
+    ;return 54
+    ; Edge
+    ;return 103
+}
+
+btmYcorr()
+{
+    return 0
+    ; Windows 10 taskbar
+    ;return 40
+}
+
 
 ClickBottomSubmit()
 {
     GoToBottom()
-    MouseClick, left, 93, 991
+    Sleep 150
+    y := 991 - btmYcorr()
+    MouseClick, left, 93, %y%
     Sleep, 500
     ; click WARN0018 >30 shot warning
-    MouseClick, left, 808,504
+    y := 480 - btmYcorr() + topYcorr()
+    MouseClick, left, 804, %y%
     Sleep, 3500
     return
 }
@@ -28,9 +59,12 @@ ClickBottomSubmit()
 GoToTop()
 {
     MouseGetPos, mX, mY
-    MouseClick, left, 1620,120
+    y := 66 + topYcorr()
+    MouseClick, left, 1620, %y%
     Sleep, 10
-    MouseClick, left, 110, 10
+    ; TODO might have to adjust this + GoToBottom
+    ; TODO Use ControlFocus instead of clicking
+    ;MouseClick, left, 110, 10
     MouseMove, mX, mY
     Sleep, 10
     Send {Home}
@@ -41,9 +75,10 @@ GoToTop()
 GoToBottom()
 {
     MouseGetPos, mX, mY
-    MouseClick, left, 1620,120
+    y := 66 + topYcorr()
+    MouseClick, left, 1620, %y%
     Sleep, 10
-    MouseClick, left, 110, 10
+    ;MouseClick, left, 110, 10
     MouseMove, mX, mY
     Sleep, 10
     Send {End}
@@ -63,77 +98,61 @@ PrevRecord()
     return
 }
 
-ClearField()
-{
-    MouseGetPos, mX, mY
-    MouseClick, left, 300, 573
-    MouseMove, mX, mY
-    Send {Shift down}{Tab}{Shift up}{Tab}
-    Send {Backspace}
-    return
-}
-
 ClickUpload()
 {
     GoToBottom()
-    MouseMove, 344, 500
+    y := 500 - btmYcorr()
+    MouseMove, 344, %y%
     Sleep, 300
     ; click upload
-    MouseClick, left, 344, 500
+    MouseClick, left, 344, %y%
     Sleep, 1150
     return
 }
 
-;NumpadUp::ClearField()
-NumpadUp::
-ClickUpload()
-ClickBottomSubmit()
-GoToTop()
-Sleep 150
-MouseClick left, 432, 308
-Send {Numlock}
-Sleep 1000
-MouseClick left, 206, 643
-Sleep 100
-Send {End}{Shift down}{Home}{Shift Up}
-return
-
-
-
 GoToIndivSearch()
 {
     GoToTop()
-    MouseClick, left, 66, 235 ;Welcome
-    MouseMove, 180, 235
+    y := 181 + topYcorr()
+    MouseClick, left, 66, %y% ;Welcome
+    MouseMove, 180, %y%
     Sleep, 500 ; Cannot be lower
-    MouseClick, left, 180, 235 ;Main
+    MouseClick, left, 180, %y% ;Main
     Sleep, 100
-    MouseClick, left, 72, 292 ;Enter Pistol
+    y := 238 + topYcorr()
+    MouseClick, left, 72, %y% ;Enter Pistol
     Sleep, 100
-    MouseClick, left, 338, 390 ;CPL
+    y := 336 + topYcorr()
+    MouseClick, left, 338, %y% ;CPL
     Sleep, 100
-    MouseClick, left, 70, 390 ;Individual
+    MouseClick, left, 70, %y% ;Individual
     Sleep, 100
-    MouseClick, left, 90, 560 ;Last Name Field
-    MouseMove 54, 683 ;Move to first record
+    y := 506 + topYcorr()
+    MouseClick, left, 90, %y% ;Last Name Field
+    y := 629 + topYcorr()
+    MouseMove 54, %y% ;Move to first record
     return
 }
 
 GoToPistolSearch()
 {
     GoToTop()
-    Sleep, 100
-    MouseClick, left, 66, 235 ;Welcome
-    ;MouseMove, 180, 235
+    y := 181 + topYcorr()
+    MouseClick, left, 66, %y% ;Welcome
+    MouseMove, 180, %y%
     Sleep, 500 ; Cannot be lower
-    MouseClick, left, 180, 235 ;Main
+    MouseClick, left, 180, %y% ;Main
     Sleep, 100
-    MouseClick, left, 306, 292 ;Search
+    y := 238 + topYcorr()
+    MouseClick, left, 306, %y% ;Search
     Sleep, 100
-    MouseClick, left, 608, 392 ;Pistol
+    y := 338 + topYcorr()
+    MouseClick, left, 608, %y% ;Pistol
     Sleep, 100
-    MouseClick, left, 90, 560 ;Serial Number Field
-    MouseMove 54, 765 ;Move to first record
+    y := 506 + topYcorr()
+    MouseClick, left, 90, %y% ;Serial Number Field
+    y := 711 + topYcorr()
+    MouseMove 54, %y% ;Move to first record
     return
 }
 
@@ -141,17 +160,21 @@ GoToFFLSearch()
 {
     GoToTop()
     MouseGetPos, mX, mY
-    MouseClick, left, 66, 235 ;Welcome
+    y := 181 + topYcorr()
+    MouseClick, left, 66, %y% ;Welcome
     Sleep, 500 ; Cannot be lower
-    MouseClick, left, 180, 235 ;Main
+    MouseClick, left, 180, %y% ;Main
     Sleep, 100
-    MouseClick, left, 72, 292 ;Enter Pistol
+    y := 238 + topYcorr()
+    MouseClick, left, 72, %y% ;Enter Pistol
     Sleep, 100
-    MouseClick, left, 338, 390 ;CPL
+    y := 336 + topYcorr()
+    MouseClick, left, 338, %y% ;CPL
     Sleep, 100
-    MouseClick, left, 609, 390 ;Business/FFL
+    MouseClick, left, 609, %y% ;Business/FFL
     Sleep, 100
-    MouseClick, left, 210, 560 ;FFL Number Field
+    y := 506 + topYcorr()
+    MouseClick, left, 210, %y% ;FFL Number Field
     MouseMove, mX, mY
     return
 }
@@ -160,22 +183,27 @@ ClickFirstPistol()
 {
     ;Send {NumpadEnter}
     ;Sleep, 500
-    MouseClick, left, 54, 765
-    Sleep, 5000
+    y := 711 + topYcorr()
+    MouseClick, left, 54, %y%
+    Sleep 250
+    MouseMove, 20, %y%
+    Sleep 4750
     return
 }
 
 UploadSalesRecord()
 {
     GoToBottom()
-    MouseMove, 279, 584
+    y := 584 - btmYcorr()
+    MouseMove, 279, %y%
     Sleep, 300
-    MouseClick, left, 279, 584
+    MouseClick, left, 279, %y%
     Sleep, 750
     GoToBottom()
-    MouseMove, 922, 575
+    y := 575 - btmYcorr()
+    MouseMove, 922, %y%
     Sleep, 300
-    MouseClick, left, 922, 575
+    MouseClick, left, 922, %y%
     Sleep, 400
     WinGetTitle, filename, ahk_class Photo_Lightweight_Viewer
     filename := StrReplace(filename, " - Windows Photo Viewer", "")
@@ -211,7 +239,7 @@ UploadSalesRecord()
     {
         Send {Alt down}{F4}{Alt up}
         Sleep 200
-        MouseClick, left, 922, 575
+        MouseClick, left, 922, %y%
         Sleep 250
     }
     Try clipboard := cbcontents
@@ -222,15 +250,24 @@ UploadSalesRecord()
     Sleep 300
     SelectRecordType()
     GoToTop()
+    ; Preselect "Overall Length" field since it's forgotten a lot
+    ; of the time
+    Sleep 200
+    y := 650 + topYcorr()
+    MouseClick left, 953, %y%
+    ;TODO: select text with shift tab + tab and copy to clipboard
+    ; enter numlock mode on if field is empty
+    ;Send {End}{Shift down}{Home}{Shift up}
     return
 }
 
 SelectRecordType()
 {
     GoToBottom()
-    MouseMove, 390, 572
+    y := 572 - btmYcorr()
+    MouseMove, 390, %y%
     Sleep, 200
-    MouseClick, left, 390, 572
+    MouseClick, left, 390, %y%
     Sleep, 150
     Send r
     Sleep, 150
@@ -242,34 +279,40 @@ SelectRecordType()
     Sleep, 300
     Send {Enter}
     Sleep, 200
-    MouseClick, left, 442, 578
+    y := 578 - btmYcorr()
+    MouseClick, left, 442, %y%
     Sleep, 100
     return
 }
 
 SubmitSalesRecord()
 {
-    ClickUpload()
-    Send {NumLock}
     ClickBottomSubmit()
+    Send {NumLock}
+    ClickUpload()
     return
 }
 
 SC029 & 1::
+SetNumLockState On
 GoToIndivSearch()
 return
 
 SC029 & 2::
+SetNumLockState On
 GoToPistolSearch()
 return
 
 SC029 & 3::
+SetNumLockState On
 GoToFFLSearch()
 return
 
 NumpadEnd::
-ClickFirstPistol()
-UploadSalesRecord()
+ClickUpload()
+NextRecord()
+SetNumLockState On
+GoToPistolSearch()
 return
 
 ;TODO
@@ -279,9 +322,20 @@ Run, msedge.exe
 WinWait, Microsoft Edge,, 0.5
 ;WinWaitActive ahk_exe msedge.exe
 ;Send {Ctrl down}t{Ctrl up}
+Send http://hcs551chrspw902.mspad.state.mi.us:9080/navigator/{Enter}
+Sleep 200
+Send {Ctrl down}l{Ctrl up}
+Sleep 200
 Send {Space}Selected Handgun Detail{Home}genitron{Space}
-Send {LWin down}{Right}{LWin up}
+;Send {LWin down}{Right}{LWin up}
 SetNumLockState On
+SetCapsLockState On
+return
+
+NumpadPgDn::
+SubmitSalesRecord()
+NextRecord()
+GoToIndivSearch()
 return
 
 NumpadDel::
@@ -292,15 +346,12 @@ if (!WinActive("PISTOL - Work - Microsoft Edge")) {
 }
 ControlFocus, ahk_exe msedge.exe, PISTOL - Work - Microsoft Edge
 SetNumLockState On
+SetCapsLockState Off
 return
 
-NumpadPgUp::NextRecord()
-NumpadHome::PrevRecord()
-
-NumpadPgDn::
-SubmitSalesRecord()
-NextRecord()
-GoToIndivSearch()
+NumpadEnter::
+SetNumLockState Off
+Send {Enter}
 return
 
 NumpadLeft::
@@ -313,17 +364,49 @@ NextRecord()
 GoToPistolSearch()
 return
 
+NumpadHome::Send /
+
+;NumpadUp::ClearField()
+NumpadUp::
+ClickUpload()
+;ClickBottomSubmit()
+GoToTop()
+Sleep 150
+y := 254 + topYcorr()
+MouseClick left, 432, %y%
+Send {Numlock}
+Sleep 1000
+y := 589 + topYcorr()
+MouseClick left, 206, %y%
+Sleep 100
+Send {End}{Shift down}{Home}{Shift Up}
+return
+
+NumpadPgUp::
+ClickFirstPistol()
+UploadSalesRecord()
+SetNumLockState Off
+return
+
+NumpadDiv::PrevRecord()
+
+NumpadMult::NextRecord()
+
+NumpadSub::+Tab
+
+NumpadAdd::Tab
+
 ; TODO Use backtick commands to click on first user in list, click enter pistol,
 ; click enter individual using data from fields to fill the new user fields, etc..
 
 ; Backtick+Q goes to first entry in list of pistols
-SC029 & Q::
-MouseClick, left, 265, 745
-sleep, 10
-MouseClick, left, 265, 750 ;Go to pistols menu
-sleep, 400
-MouseClick, left, 73, 880 ;Move to first record
-return
+;SC029 & Q::
+;MouseClick, left, 265, 745
+;sleep, 10
+;MouseClick, left, 265, 750 ;Go to pistols menu
+;sleep, 400
+;MouseClick, left, 73, 880 ;Move to first record
+;return
 
 Control & Backspace::
 MouseGetPos, mX, mY
