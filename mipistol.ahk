@@ -26,6 +26,7 @@ IEHeight = 54
 ; correct y from top / bottom
 topYcorr()
 {
+    ; Fullscreen
     return 0
     ; IE: (Use global variables here) return IEHeight, etc
     ;return 54
@@ -35,11 +36,30 @@ topYcorr()
 
 btmYcorr()
 {
+    ; Fullscreen
     return 0
     ; Windows 10 taskbar
     ;return 40
 }
 
+ClickTopSubmit()
+{
+    ;GoToTop()
+    Sleep 150
+    y := 991 - btmYcorr()
+    y := 250 + topYcorr()
+    MouseClick left, 93, %y%
+    Sleep 500
+    ; click WARN0018 >30 shot warning, WARN0017 reenter record warning
+    y := 480 - btmYcorr() + topYcorr()
+    MouseClick left, 804, %y%
+    y := y + 10
+    MouseClick left, 804, %y%
+    ; if url == https://micjin.state.mi.us/MiPistol/UI/index.html#!/purchaser
+    ; don't sleep as long, go to pistolsearch, call NextRecord()
+    Sleep 3500
+    return
+}
 
 ClickBottomSubmit()
 {
@@ -53,6 +73,50 @@ ClickBottomSubmit()
     MouseClick left, 804, %y%
     Sleep 3500
     return
+}
+
+EnterPistol()
+{
+    y := 700 + topYcorr()
+    MouseClick left, 270, %y%
+    y := y-20
+    MouseClick left, 270, %y%
+    Sleep 700
+    y := 738 + topYcorr()
+    MouseClick left, 90, %y%
+    SetNumLockState On
+    return
+}
+
+AddPurchaser()
+{
+    cbcontents = %clipboard%
+    y := 523 + topYcorr()
+    MouseClick left, 268, %y%
+    Send {Tab}{Shift Down}{
+    Try clipboard := cbcontents
+    ; ...
+    return
+}
+
+GetManufacturer()
+{
+    cbcontents = %clipboard%
+    y := 707 + topYcorr()
+    MouseMove 707, %y%
+    Sleep 10
+    MouseClick left, 707, %y%
+    Sleep 250
+    MouseClick left, 707, %y%
+    Sleep 250
+    Send {Ctrl down}{c}{Ctrl up}
+    ;if (clipboard == "SIG")
+    ;{
+        ;setscrolllockstate on
+    ;}
+    m = %clipboard%
+    Try clipboard = %cbcontents%
+    return m
 }
 
 
@@ -101,7 +165,7 @@ PrevRecord()
 ClickUpload()
 {
     GoToBottom()
-    y := 500 - btmYcorr()
+    y := 505 - btmYcorr()
     MouseMove 344, %y%
     Sleep 300
     ; click upload
@@ -112,6 +176,7 @@ ClickUpload()
 
 GoToIndivSearch()
 {
+    SetNumLockState On
     GoToTop()
     y := 181 + topYcorr()
     MouseClick left, 66, %y% ;Welcome
@@ -136,6 +201,7 @@ GoToIndivSearch()
 
 GoToPistolSearch()
 {
+    SetNumLockState On
     GoToTop()
     y := 181 + topYcorr()
     MouseClick left, 66, %y% ;Welcome
@@ -158,6 +224,7 @@ GoToPistolSearch()
 
 GoToFFLSearch()
 {
+    SetNumLockState On
     GoToTop()
     MouseGetPos mX, mY
     y := 181 + topYcorr()
@@ -211,13 +278,18 @@ UploadSalesRecord()
     ; RI-060_00XX-XXXXXX.tif
     batchnumber := SubStr(filename, 13, 6)
     Send {Alt down}{d}{Alt up}
-    Sleep 50
+    Sleep 150
     cbcontents = %clipboard%
     Send {Ctrl down}{c}{Ctrl up}
     Sleep 50
     path := "X:\MiPistol\RI-060\Dennis\" batchnumber "-Farmer"
     if (path != clipboard)
     {
+        if (clipboard == "https://micjin.state.mi.us/MiPistol/UI/index.html#!/pistol")
+        {
+            ; incorrect text selected, file explorer not focused
+            Reload  ; break
+        }
         Send %path%{Enter}
         Sleep 200
         Loop 7
@@ -244,7 +316,7 @@ UploadSalesRecord()
     ; Preselect "Overall Length" field since it's forgotten a lot
     ; of the time
     Sleep 200
-    y := 650 + topYcorr()
+    y := 665 + topYcorr() ;650
     MouseClick left, 953, %y%
     ;TODO: select text with shift tab + tab and copy to clipboard
     ; enter numlock mode on if field is empty
@@ -281,43 +353,53 @@ SubmitSalesRecord()
     return
 }
 
+;TODO
+;SC029 & Shift::Send ~
+
 SC029 & 1::
-SetNumLockState On
 GoToIndivSearch()
 return
 
 SC029 & 2::
-SetNumLockState On
 GoToPistolSearch()
 return
 
 SC029 & 3::
-SetNumLockState On
 GoToFFLSearch()
 return
+
+; Backtick Q clicks enter pistol
+SC029 & Q::EnterPistol()
+
+; Backtick W Creates new purchaser using info from fields
+SC029 & W::AddPurchaser()
+
+;who is karen johnson? "programming"
+
+
 
 NumpadEnd::
 ClickUpload()
 NextRecord()
-SetNumLockState On
 GoToPistolSearch()
 return
 
 ;TODO
 NumpadDown::
-Run msedge.exe
-;ControlFocus ahk_exe msedge.exe
-WinWait Microsoft Edge,, 0.5
+;Run msedge.exe
+Run chrome.exe
+;;ControlFocus ahk_exe msedge.exe
+WinWait,,"MSP Firearms Application - Google Chrome", 0.5
 ;WinWaitActive ahk_exe msedge.exe
 ;Send {Ctrl down}t{Ctrl up}
 Send http://hcs551chrspw902.mspad.state.mi.us:9080/navigator/{Enter}
-Sleep 200
+Sleep 1500
 Send {Ctrl down}l{Ctrl up}
 Sleep 200
 Send {Space}Selected Handgun Detail{Home}genitron{Space}
 ;Send {LWin down}{Right}{LWin up}
 SetNumLockState On
-SetCapsLockState On
+;SetCapsLockState On
 return
 
 NumpadPgDn::
@@ -329,7 +411,6 @@ return
 NumpadDel::
 if (!WinActive(,"PISTOL - Work - Microsoft Edge")) {
     ; currently runs when mipistol is active, TODO
-    ; 6/16: should be fixed, see help page
     
     Send {Ctrl down}w{Ctrl up}
 
@@ -354,9 +435,10 @@ NextRecord()
 GoToPistolSearch()
 return
 
-NumpadHome::Send /
+NumpadHome::ClickTopSubmit()
 
 ;NumpadUp::ClearField()
+;DONT RUN IF SELLER IS FFL
 NumpadUp::
 ClickUpload()
 ;ClickBottomSubmit()
@@ -372,19 +454,59 @@ Sleep 100
 Send {End}{Shift down}{Home}{Shift Up}
 return
 
+;TODO only catches SIG the second time for some reason
+; might just have to adjust copy part timings (sleep)
+
+; use clipboard to determine manuf. instad of function return?
+; SIG is on clipboard but var m doesn't seem to work
 NumpadPgUp::
+;SIG_SAUER := "SIG"
+;m := GetManufacturer()
 ClickFirstPistol()
+;if (m != SIG_SAUER)
+;{
+    ;UploadSalesRecord()
+;}
 UploadSalesRecord()
 SetNumLockState Off
 return
+
+; too buggy, maybe try increasing sleep times but I don't
+; think it's worth the error rate
+    ;setscrolllockstate on
+    ;y := 245 + topYcorr()
+    ;MouseClick left, 310, %y%
+    ;Sleep 100
+    ;y := 515 + topYcorr()
+    ;MouseClick left, 715, %y%
+    ;Sleep 300
+    ;Loop 3
+    ;{
+        ;Send S
+        ;Sleep 300
+    ;}
+    ;Send {Enter}
+    ;ClickTopSubmit()
+    ;Sleep 100
+
+;else
+;{
+    ;Try clipboard := %m%
+;}
 
 NumpadDiv::PrevRecord()
 
 NumpadMult::NextRecord()
 
-NumpadSub::+Tab
+NumpadSub::
+Send {Shift down}{Tab}{Shift up}
+SetNumLockState On
+return
 
-NumpadAdd::Tab
+NumpadAdd::
+Send {Tab}
+SetNumLockState On
+return
 
 ; TODO Use backtick commands to click on first user in list, click enter pistol,
 ; click enter individual using data from fields to fill the new user fields, etc..
